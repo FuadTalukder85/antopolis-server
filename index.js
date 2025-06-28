@@ -26,7 +26,6 @@ const client = new MongoClient(uri, {
   },
 });
 const multer = require("multer");
-const upload = multer({ dest: "uploads/" });
 async function run() {
   try {
     await client.connect();
@@ -37,15 +36,20 @@ async function run() {
     const categoryCollection = db.collection("categoryItems");
 
     // POST: Add a new food item
-    app.post("/foodItem", upload.single("image"), async (req, res) => {
-      const { foodName, category } = req.body;
-      const imageFile = req.file;
+    app.post("/foodItem", async (req, res) => {
+      const { foodName, category, image } = req.body;
+
+      if (!foodName || !category || !image) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Missing fields" });
+      }
 
       try {
         const result = await foodItemCollection.insertOne({
           foodName,
           category,
-          imagePath: imageFile?.filename,
+          image,
         });
 
         res.status(201).json({ success: true, data: result });
@@ -56,6 +60,7 @@ async function run() {
           .json({ success: false, message: "Internal server error" });
       }
     });
+
     // Serve images from /uploads
     app.use("/uploads", express.static(path.join(__dirname, "uploads")));
     // GET: All food items
