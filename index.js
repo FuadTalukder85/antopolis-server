@@ -25,16 +25,14 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   },
 });
-const multer = require("multer");
+// const multer = require("multer");
 async function run() {
   try {
     await client.connect();
     console.log("✅ Connected to MongoDB");
-
     const db = client.db("antopolis");
     const foodItemCollection = db.collection("foodItem");
     const categoryCollection = db.collection("categoryItems");
-
     // POST: Add a new food item
     app.post("/foodItem", async (req, res) => {
       const { foodName, category, image } = req.body;
@@ -44,14 +42,12 @@ async function run() {
           .status(400)
           .json({ success: false, message: "Missing fields" });
       }
-
       try {
         const result = await foodItemCollection.insertOne({
           foodName,
           category,
           image,
         });
-
         res.status(201).json({ success: true, data: result });
       } catch (error) {
         console.error("Insert error:", error);
@@ -62,7 +58,7 @@ async function run() {
     });
 
     // Serve images from /uploads
-    app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+    // app.use("/uploads", express.static(path.join(__dirname, "uploads")));
     // GET: All food items
     app.get("/foodItem", async (req, res) => {
       try {
